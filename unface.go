@@ -1,8 +1,12 @@
 package unface
 
 import (
+	"errors"
 	"reflect"
 )
+
+// ErrUnsupportedType is returned when unface is called with an unsupported type
+var ErrUnsupportedType = errors.New("unsupported type")
 
 // Unface converts src interface to dest type
 func Unface[T any](src interface{}, dest *T) error {
@@ -11,5 +15,12 @@ func Unface[T any](src interface{}, dest *T) error {
 		return err
 	}
 
-	return nil
+	destValue := reflect.ValueOf(dest)
+
+	if srcValue.Type() == destValue.Elem().Type() {
+		*dest = src.(T)
+		return nil
+	}
+
+	return ErrUnsupportedType
 }
